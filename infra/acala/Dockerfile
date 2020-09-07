@@ -13,13 +13,9 @@ RUN git clone https://github.com/AcalaNetwork/Acala.git
 RUN mv Acala /app
 WORKDIR /app
 
-# TEMPORARY: use the branch that has a good reference to the submodules
-# TODO: remove when the `master` branch of Acala is updated
-RUN git fetch
-RUN git checkout update-orml
-RUN git pull
-
 # Make sure submodule.recurse is set to true to make life with submodule easier.
+RUN git fetch
+RUN git pull
 RUN git config --global submodule.recurse true
 
 # Build

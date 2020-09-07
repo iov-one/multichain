@@ -10,7 +10,7 @@ import (
 	"github.com/centrifuge/go-substrate-rpc-client/types"
 )
 
-type eventAssetsMinted struct {
+type eventMinted struct {
 	Phase    types.Phase
 	Who      types.AccountID
 	Currency types.U8
@@ -18,34 +18,29 @@ type eventAssetsMinted struct {
 	Topics   []types.Hash
 }
 
+type eventBurnt struct {
+	Owner  types.AccountID
+	Dest   types.AccountID
+	Amount types.U128
+}
+
 type EventsWithMint struct {
 	types.EventRecords
-	RenToken_AssetsMinted []eventAssetsMinted //nolint:stylecheck,golint
+	RenToken_Minted []eventMinted //nolint:stylecheck,golint
 }
 
-func FindEventForEventID(m types.MetadataV10, eventID types.EventID) (*types.EventMetadataV4, error) {
-	mi := uint8(0)
-	for _, mod := range m.Modules {
-		if !mod.HasEvents {
-			continue
-		}
-		if mi != eventID[0] {
-			mi++
-			continue
-		}
-		if int(eventID[1]) >= len(mod.Events) {
-			return nil, fmt.Errorf("event index %v for module %v out of range", eventID[1], mod.Name)
-		}
-		return &mod.Events[eventID[1]], nil
-	}
-	return nil, fmt.Errorf("module index %v out of range", eventID[0])
+type EventsWithBurn struct {
+	types.EventRecords
+	RenToken_Burnt []eventBurnt //nolint:stylecheck,golint
 }
 
-// DecodeEventRecords decodes the events records from an EventRecordRaw into a target t using the given Metadata m
-// If this method returns an error like `unable to decode Phase for event #x: EOF`, it is likely that you have defined
-// a custom event record with a wrong type. For example your custom event record has a field with a length prefixed
-// type, such as types.Bytes, where your event in reallity contains a fixed width type, such as a types.U32.
-func DecodeEvents(e *types.EventRecordsRaw, m *types.Metadata, t interface{}) error {
+// ParseEvents decodes the events records from an EventRecordRaw into a target
+// t using the given Metadata m. If this method returns an error like `unable
+// to decode Phase for event #x: EOF`, it is likely that you have defined a
+// custom event record with a wrong type. For example your custom event record
+// has a field with a length prefixed type, such as types.Bytes, where your
+// event in reality contains a fixed width type, such as a types.U32.
+func ParseEvents(e *types.EventRecordsRaw, m *types.Metadata, t interface{}) error {
 	// ensure t is a pointer
 	ttyp := reflect.TypeOf(t)
 	if ttyp.Kind() != reflect.Ptr {
@@ -111,7 +106,7 @@ func DecodeEvents(e *types.EventRecordsRaw, m *types.Metadata, t interface{}) er
 		// check whether name for eventID exists in t
 		field := val.FieldByName(fmt.Sprintf("%v_%v", moduleName, eventName))
 		if !field.IsValid() {
-			eventParams, err := FindEventForEventID(m.AsMetadataV10, id)
+			eventParams, err := findEventForEventID(m.AsMetadataV10, id)
 			if err != nil {
 				return fmt.Errorf("unable to find event with EventID %v in metadata for event #%v: %s", id, i, err)
 			}
@@ -306,4 +301,22 @@ func DecodeEvents(e *types.EventRecordsRaw, m *types.Metadata, t interface{}) er
 		fmt.Println(fmt.Sprintf("decoded event #%v", i))
 	}
 	return nil
+}
+
+func findEventForEventID(m types.MetadataV10, eventID types.EventID) (*types.EventMetadataV4, error) {
+	mi := uint8(0)
+	for _, mod := range m.Modules {
+		if !mod.HasEvents {
+			continue
+		}
+		if mi != eventID[0] {
+			mi++
+			continue
+		}
+		if int(eventID[1]) >= len(mod.Events) {
+			return nil, fmt.Errorf("event index %v for module %v out of range", eventID[1], mod.Name)
+		}
+		return &mod.Events[eventID[1]], nil
+	}
+	return nil, fmt.Errorf("module index %v out of range", eventID[0])
 }
