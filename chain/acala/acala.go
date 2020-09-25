@@ -128,8 +128,8 @@ func (client *Client) BurnEvent(
 		// FIXME: return err instead of panicking
 		panic(err)
 	}
-	addrEncoder := NewAddressEncoder()
-	to, err := addrEncoder.EncodeAddress(address.RawAddress(pack.NewBytes(buf.Bytes())))
+	addrEncodeDecoder := NewAddressEncodeDecoder()
+	to, err := addrEncodeDecoder.EncodeAddress(address.RawAddress(pack.NewBytes(buf.Bytes())))
 	if err != nil {
 		// FIXME: return err instead of panicking
 		panic(err)

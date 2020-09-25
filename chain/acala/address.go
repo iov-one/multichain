@@ -7,25 +7,30 @@ import (
 	"github.com/renproject/multichain/api/address"
 )
 
-type addressDecoder struct{}
+// AddressDecoder implements the address.Decoder interface.
+type AddressDecoder struct{}
 
-type addressEncoder struct{}
+// AddressEncoder implements the address.Encoder interface.
+type AddressEncoder struct{}
 
-// NewAddressDecoder returns the default AddressDecoder for Substract chains. It
-// uses the Bitcoin base58 alphabet to decode the string, and interprets the
-// result as a 2-byte address type, 32-byte array, and 1-byte checksum.
-func NewAddressDecoder() address.Decoder {
-	return addressDecoder{}
+// AddressEncodeDecoder implements the address.EncodeDecoder interface.
+type AddressEncodeDecoder struct {
+	AddressEncoder
+	AddressDecoder
 }
 
-func NewAddressEncoder() address.Encoder {
-	return addressEncoder{}
+// NewAddressEncodeDecoder constructs a new AddressEncodeDecoder.
+func NewAddressEncodeDecoder() AddressEncodeDecoder {
+	return AddressEncodeDecoder{
+		AddressEncoder: AddressEncoder{},
+		AddressDecoder: AddressDecoder{},
+	}
 }
 
 // DecodeAddress the string using the Bitcoin base58 alphabet. If the string
 // does not a 2-byte address type, 32-byte array, and 1-byte checksum, then an
 // error is returned.
-func (addressDecoder) DecodeAddress(addr address.Address) (address.RawAddress, error) {
+func (AddressDecoder) DecodeAddress(addr address.Address) (address.RawAddress, error) {
 	data := base58.Decode(string(addr))
 	if len(data) != 35 {
 		return address.RawAddress([]byte{}), fmt.Errorf("expected 35 bytes, got %v bytes", len(data))
@@ -33,7 +38,12 @@ func (addressDecoder) DecodeAddress(addr address.Address) (address.RawAddress, e
 	return address.RawAddress(data), nil
 }
 
-func (addressEncoder) EncodeAddress(rawAddr address.RawAddress) (address.Address, error) {
-	data := base58.Encode(rawAddr)
-	return address.Address(data), nil
+// EncodeAddress the raw bytes using the Bitcoin base58 alphabet. If the data to
+// encode is not a 2-byte address type, 32-byte array, and 1-byte checksum, then
+// an error is returned.
+func (AddressEncoder) EncodeAddress(rawAddr address.RawAddress) (address.Address, error) {
+	if len(rawAddr) != 35 {
+		return address.Address(""), fmt.Errorf("expected 35 bytes, got %v bytes", len(rawAddr))
+	}
+	return address.Address(base58.Encode(rawAddr)), nil
 }
