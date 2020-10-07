@@ -73,7 +73,7 @@ func ParseEvents(e *types.EventRecordsRaw, m *types.Metadata, t interface{}) err
 	fmt.Println(fmt.Sprintf("found %v events", n))
 
 	// iterate over events
-	for i := uint64(0); i < n; i++ {
+	for i := uint64(0); i < n.Uint64(); i++ {
 		fmt.Println(fmt.Sprintf("decoding event #%v", i))
 
 		// decode Phase

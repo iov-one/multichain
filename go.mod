@@ -5,7 +5,7 @@ go 1.14
 require (
 	github.com/btcsuite/btcd v0.20.1-beta
 	github.com/btcsuite/btcutil v1.0.2
-	github.com/centrifuge/go-substrate-rpc-client v1.1.0
+	github.com/centrifuge/go-substrate-rpc-client v2.0.0+incompatible
 	github.com/codahale/blake2 v0.0.0-20150924215134-8d10d0420cbf
 	github.com/cosmos/cosmos-sdk v0.39.1
 	github.com/drand/drand v1.0.3-0.20200714175734-29705eaf09d4 // indirect

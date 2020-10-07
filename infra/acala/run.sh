@@ -3,7 +3,9 @@ ADDRESS=$1
 
 # Start
 cd /app
-make run
+# make run
+# cargo run -- --dev --execution=native -lruntime=debug --ws-external --rpc-external
+SKIP_WASM_BUILD= cargo run -- --dev --execution=native -lruntime=debug --ws-external --rpc-external
 sleep 10
 
 # Print setup

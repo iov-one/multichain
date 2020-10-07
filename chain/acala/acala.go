@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	DefaultClientRPCURL = "http://127.0.0.1:9944"
+	DefaultClientRPCURL = "ws://127.0.0.1:9944"
 )
 
 type ClientOptions struct {
